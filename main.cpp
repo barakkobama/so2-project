@@ -58,22 +58,6 @@ int main()
     {
         bee.join();
     }
-
-
-    /*mutex flowersMutex;
-    while(Flower::m_fullFlowers > 0)
-    {
-        for(int i{0}; i < c_beeNumber; ++i)
-        {
-            lock_guard<mutex> lock(flowersMutex);
-            beeThreads[i] = thread(&Bee::findFlower, &bees[i], ref(flowers));
-        }
-    }*/
    
     cout<<"All the flowers are empty, time to find a new meadow!\n";
-    /*
-    for( auto& bee : beeThreads)
-    {
-        bee.join();
-    }*/
 }
