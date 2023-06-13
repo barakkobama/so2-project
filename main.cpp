@@ -3,21 +3,24 @@
 #include <iostream>
 #include <thread>
 #include <functional>
-#include "Bee.h"
-#include "Bumblebee.h"
-#include "Flower.h"
-#include "Hive.h"
+#include "Bee.hpp"
+#include "Flower.hpp"
+#include "Hive.hpp"
+#include "Visualisation.hpp"
 #include <memory>
 
 
-using namespace std;
+static std::random_device rd;
+static std::mt19937 gen(rd());
 
+bool getRandomBool()
+{
+    std::uniform_int_distribution<int> dis(0, 1);
+    return static_cast<bool>(dis(gen));
+}
 float getRandomFloat(float a, float b)
 {
-    static random_device rd;
-    static mt19937 gen(rd());
-    uniform_real_distribution<float> dis(a, b);
-
+    std::uniform_real_distribution<float> dis(a, b);
     return dis(gen);
 }
 
@@ -25,7 +28,6 @@ int main()
 {
     constexpr size_t c_flowerNumber = 4;
     constexpr size_t c_beeNumber = 5;
-    //constexpr size_t c_bumblebeeNumber = 2;
 
     constexpr float c_minBeeIntake = 0.01f;
     constexpr float c_maxBeeIntake = 0.1f;
@@ -34,31 +36,43 @@ int main()
 
     auto hive = std::make_shared<Hive>();
 
-    vector<Flower> flowers (c_flowerNumber);
+    vector<Flower> flowers;
+    flowers.resize(c_flowerNumber);
     vector<Bee> bees;
     bees.resize(c_beeNumber);
+
+    for (int i=0; i<c_flowerNumber; ++i)
+    {
+        flowers[i] = Flower(getRandomBool());
+    }
     
     for(int i=0; i< c_beeNumber; ++i)
     {
         bees[i] = Bee(
             getRandomFloat(c_minBeeIntake, c_maxBeeIntake),
             getRandomFloat(c_minBeeCapasity, c_maxBeeCapasity),
-            hive
+            hive,
+            getRandomBool()
         );
     }
 
 
     vector<thread> beeThreads(c_beeNumber);
 
-    for (int i=0; i < c_beeNumber; i++)
-    {
-        beeThreads[i] = thread(&Bee::findFlower, &bees[i], ref(flowers));
-    }
+    Visualisation vis;
 
-    for (auto& bee : beeThreads)
-    {
-        bee.join();
-    }
+    vis.prepereScreen(flowers, bees, hive);
+    vis.displayAnimation(bees);
+
+    // for (int i=0; i < c_beeNumber; i++)
+    // {
+    //     beeThreads[i] = thread(&Bee::findFlower, &bees[i], ref(flowers));
+    // }
+
+    // for (auto& bee : beeThreads)
+    // {
+    //     bee.join();
+    // }
    
-    cout<<"All the flowers are empty, time to find a new meadow!\n";
+    //cout<<"All the flowers are empty, time to find a new meadow!\n";
 }

@@ -1,18 +1,19 @@
-#include "Bee.h"
+#include "Bee.hpp"
 #include <iostream>
 #include <chrono>
 #include <thread>
 #include <mutex>
 #include <memory>
+#include <utility>
 
-using namespace std;
 
 int Bee::id = 0;
 mutex Bee::screen;
 mutex Bee::hiveMutex;
 
 //Pszczoly moga miec rozna predkosc pobierania nektaru oraz rozne pojemnosci
-Bee::Bee(const float nectarPerTick, const float capacity, std::shared_ptr<Hive> hive) : m_nectarPerTick(nectarPerTick), m_capacity(capacity), m_hive{hive}
+Bee::Bee(const float nectarPerTick, const float capacity, std::shared_ptr<Hive> hive, bool big) :
+         m_nectarPerTick(nectarPerTick), m_capacity(capacity), m_hive{hive}, m_big{big}
 {
     myid = id;
     this->id++;
@@ -67,9 +68,9 @@ void Bee::getNectar(Flower &flower)
 
     this->returnNectar();
 
-    screen.lock();
-    std::cout<<"The nectar level in the hive is at: "<<this->m_hive->m_nectarLevel<<std::endl;
-    screen.unlock();
+    //screen.lock();
+    //std::cout<<"The nectar level in the hive is at: "<<this->m_hive->m_nectarLevel<<std::endl;
+    //screen.unlock();
 }
 
 //Ta funckja bedzie w watku
@@ -77,28 +78,33 @@ void Bee::findFlower(vector<Flower> &flowers)
 {
     while (Flower::m_containingFlowers)
     {
-        screen.lock();
-        cout << "Bee " << myid <<" is searching for a flower"<< endl;
-        screen.unlock();
+        //screen.lock();
+        //cout << "Bee " << myid <<" is searching for a flower"<< endl;
+        //screen.unlock();
 
         for (auto& flower : flowers)
         {
-            
+            this->m_location.first = flower.m_location.first;
+            this->m_location.second = flower.m_location.second - 1;
 
-            if (!flower.m_occupied && flower.m_nectar > 0)
+            if((!flower.m_big && !this->m_big) || flower.m_big)
             {
-                flower.m_occupied = true;
-                screen.lock();
-                cout << "Flower found statring acquiering nectar... by bee " << myid << endl;
-                screen.unlock();
-                this_thread::sleep_for(chrono::milliseconds(10000));
-                this->getNectar(flower);
-                break;
+                if (!flower.m_occupied && flower.m_nectar > 0)
+                {
+                    this->m_location.second += 2;
+                    flower.m_occupied = true;
+                    //screen.lock();
+                    //cout << "Flower found statring acquiering nectar... by bee " << myid << endl;
+                    //screen.unlock();
+                    this_thread::sleep_for(chrono::milliseconds(10000));
+                    this->getNectar(flower);
+                    break;
+                }
             }
             else
-                {
-                    this_thread::sleep_for(chrono::milliseconds(1000));
-                }
+            {
+                this_thread::sleep_for(chrono::milliseconds(100));
+            }
         }
     }
 }
