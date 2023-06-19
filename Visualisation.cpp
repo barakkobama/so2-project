@@ -17,12 +17,12 @@ Visualisation::Visualisation()
 
 void Visualisation::clearScreen() {
     // Clear the console screen
-    system("clear");
+    system("clear");        //FOR LINUX
     //system("cls");        //FOR WINDOWS
     //std::cout << "\033[2J\033[1;1H";
 }
 
-
+//Funckja przygotowuje ekran obliczajc pozycje kwiatkow i ula
 void Visualisation::prepereScreen(vector<Flower>& flowers, vector<Bee>& bees, std::shared_ptr<Hive> hive){
     this->clearScreen();
     hive->m_location.first = this->rows/2;
@@ -40,9 +40,11 @@ void Visualisation::prepereScreen(vector<Flower>& flowers, vector<Bee>& bees, st
     }
 }
 
+//Funckja ustawiajaca pozycje pszczol
 void Visualisation::updateScreen(Bee& bee)
 {
-    this->display[bee.m_last_location.first][bee.m_last_location.second] = ' ';
+    
+    this->display[bee.m_last_location.first][bee.m_last_location.second] = ' ';     //Usuwanie starego znacznika pszczoly
     this->display[bee.m_last_location.first][bee.m_last_location.second + 1] = ' ';
     this->display[bee.m_location.first][bee.m_location.second] = bee.m_big ? this->bigBeeSymbol : this->smallBeeSymbol;
     this->display[bee.m_location.first][bee.m_location.second + 1] = bee.myid;

@@ -18,7 +18,8 @@ Bee::Bee(const float nectarPerTick, const float capacity, std::shared_ptr<Hive> 
     myid = id++;
 };
 
-
+//Rekurencyjnie spradza czy dane miejsce w kolejce do ula jest zajete
+//jak jest to przesuwa Y o jeden w dol
 int checkAndIncreaseQueue(Visualisation& vis, int row, int column, int queue)
 {
     if (vis.display[row + queue][column] != ' ') {
