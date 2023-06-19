@@ -7,7 +7,7 @@
 #include <utility>
 
 
-int Bee::id = 0;
+char Bee::id = '1';
 mutex Bee::screen;
 mutex Bee::hiveMutex;
 
@@ -15,95 +15,85 @@ mutex Bee::hiveMutex;
 Bee::Bee(const float nectarPerTick, const float capacity, std::shared_ptr<Hive> hive, bool big) :
          m_nectarPerTick(nectarPerTick), m_capacity(capacity), m_hive{hive}, m_big{big}
 {
-    myid = id;
-    this->id++;
+    myid = id++;
 };
 
-//Zwraca nektar do ula
-void Bee::returnNectar()
+
+int checkAndIncreaseQueue(Visualisation& vis, int row, int column, int queue)
 {
-    screen.lock();
-    cout << "Bee " << myid << " is returning to the hive " << endl;
-    screen.unlock();
+    if (vis.display[row + queue][column] != ' ') {
+        return checkAndIncreaseQueue(vis, row, column, queue + 1); 
+    } else {
+        return queue; 
+    }
+}
+
+//Zwraca nektar do ula
+void Bee::returnNectar(Visualisation& vis)
+{
+    int queue = checkAndIncreaseQueue(vis,m_hive->m_location.first+1,m_hive->m_location.second,0);
+    
+    this->m_last_location = this->m_location;
+    this->m_location.first = m_hive->m_location.first + 1 + queue;
+    this->m_location.second = m_hive->m_location.second;
+    vis.displayAnimation(*this);
 
     hiveMutex.lock();
+    this_thread::sleep_for(chrono::milliseconds(1000));
     this->m_hive->m_nectarLevel += this->m_nectar;
     this->m_nectar = 0;
-    this_thread::sleep_for(chrono::seconds(2));
     hiveMutex.unlock();
 }
 
 //Funckja wykonujaca sie w kazdym przebiegu glownej petli, decyduje o powrocie do ula i o ilosci zebranego nektaru
-void Bee::getNectar(Flower &flower)
+void Bee::getNectar(Flower &flower, Visualisation& vis)
 {
-    // screen.lock();
-    // cout << "Bee " << myid<< " is gathering the nectar..." <<endl;
-    // screen.unlock();
+    this->m_last_location = this->m_location;
+    this->m_location.first = flower.m_location.first;
+    this->m_location.second = flower.m_location.second - 2;
+    vis.displayAnimation(*this);
+    this_thread::sleep_for(chrono::milliseconds(10000));
 
-    int licznik = 0;
     while(this->m_nectar + this->m_nectarPerTick <= this->m_capacity && flower.m_nectar > 0)
     {
-        screen.lock();
-        //cout << "pobieranie by bee " << myid << " po raz " << licznik << endl;
-        licznik = licznik + 1;
-        screen.unlock();
-
         flower.m_nectar -= this->m_nectarPerTick;
-        this_thread::sleep_for(chrono::milliseconds(10));
         this->m_nectar += this->m_nectarPerTick;
     }
-
-    // screen.lock();
-    // cout << "Bee " << myid<< " is full, returning to the hive" <<endl;
-    // screen.unlock();
 
 
     if(flower.m_nectar <= 0)
     {
-        //--Flower::m_fullFlowers;
         --flower.m_containingFlowers;
     }
 
     flower.m_occupied = false;
 
-    this->returnNectar();
+    this->returnNectar(vis);
 
-    //screen.lock();
-    //std::cout<<"The nectar level in the hive is at: "<<this->m_hive->m_nectarLevel<<std::endl;
-    //screen.unlock();
 }
 
 //Ta funckja bedzie w watku
-void Bee::findFlower(vector<Flower> &flowers)
+void Bee::findFlower(vector<Flower> &flowers, Visualisation& vis)
 {
+
     while (Flower::m_containingFlowers)
     {
-        //screen.lock();
-        //cout << "Bee " << myid <<" is searching for a flower"<< endl;
-        //screen.unlock();
 
         for (auto& flower : flowers)
         {
-            this->m_location.first = flower.m_location.first;
-            this->m_location.second = flower.m_location.second - 1;
-
             if((!flower.m_big && !this->m_big) || flower.m_big)
-            {
+             {
                 if (!flower.m_occupied && flower.m_nectar > 0)
                 {
-                    this->m_location.second += 2;
                     flower.m_occupied = true;
-                    //screen.lock();
-                    //cout << "Flower found statring acquiering nectar... by bee " << myid << endl;
-                    //screen.unlock();
-                    this_thread::sleep_for(chrono::milliseconds(10000));
-                    this->getNectar(flower);
+                    this_thread::sleep_for(chrono::milliseconds(1000));
+                    this->getNectar(flower,vis);
                     break;
                 }
             }
             else
             {
-                this_thread::sleep_for(chrono::milliseconds(100));
+                this_thread::sleep_for(chrono::milliseconds(1000));
             }
         }
     }

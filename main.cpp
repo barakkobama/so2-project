@@ -26,8 +26,8 @@ float getRandomFloat(float a, float b)
 
 int main()
 {
-    constexpr size_t c_flowerNumber = 4;
-    constexpr size_t c_beeNumber = 5;
+    constexpr size_t c_flowerNumber = 6;
+    constexpr size_t c_beeNumber = 4;
 
     constexpr float c_minBeeIntake = 0.01f;
     constexpr float c_maxBeeIntake = 0.1f;
@@ -62,17 +62,15 @@ int main()
     Visualisation vis;
 
     vis.prepereScreen(flowers, bees, hive);
-    vis.displayAnimation(bees);
+    for (int i=0; i < c_beeNumber; i++)
+    {
+        beeThreads[i] = thread(&Bee::findFlower, &bees[i], ref(flowers), ref(vis));
+    }
 
-    // for (int i=0; i < c_beeNumber; i++)
-    // {
-    //     beeThreads[i] = thread(&Bee::findFlower, &bees[i], ref(flowers));
-    // }
-
-    // for (auto& bee : beeThreads)
-    // {
-    //     bee.join();
-    // }
+    for (auto& bee : beeThreads)
+    {
+        bee.join();
+    }
    
     //cout<<"All the flowers are empty, time to find a new meadow!\n";
 }

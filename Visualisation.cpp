@@ -1,6 +1,7 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include <cstdlib>
 #include "Visualisation.hpp"
 
 
@@ -15,12 +16,13 @@ Visualisation::Visualisation()
 
 void Visualisation::clearScreen() {
     // Clear the console screen
-    std::cout << "\033[2J\033[1;1H";
+    system("clear");
+    //std::cout << "\033[2J\033[1;1H";
 }
 
 
 void Visualisation::prepereScreen(vector<Flower>& flowers, vector<Bee>& bees, std::shared_ptr<Hive> hive){
-
+    this->clearScreen();
     hive->m_location.first = this->rows/2;
     hive->m_location.second = 1;
 
@@ -36,27 +38,24 @@ void Visualisation::prepereScreen(vector<Flower>& flowers, vector<Bee>& bees, st
     }
 }
 
-void Visualisation::updateScreen(vector<Bee>& bees)
+void Visualisation::updateScreen(Bee& bee)
 {
-    for (auto& bee : bees)
-    {
-        this->display[bee.m_location.first][bee.m_location.second] = bee.m_big ? this->bigBeeSymbol : this->smallBeeSymbol;
-    }
+    this->display[bee.m_last_location.first][bee.m_last_location.second] = ' ';
+    this->display[bee.m_last_location.first][bee.m_last_location.second + 1] = ' ';
+    this->display[bee.m_location.first][bee.m_location.second] = bee.m_big ? this->bigBeeSymbol : this->smallBeeSymbol;
+    this->display[bee.m_location.first][bee.m_location.second + 1] = bee.myid;
 }
 
-void Visualisation::displayAnimation(vector<Bee>& bees) {
+void Visualisation::displayAnimation(Bee& bee) {
  
-    while(true){
-        this->clearScreen();
-        updateScreen(bees);
-        for(int i = 0; i < this->rows; ++i)
+    this->clearScreen();
+    this->updateScreen(bee);
+    for(int i = 0; i < this->rows; ++i)
+    {
+        for(int j = 0; j < this->columns; ++j)
         {
-                for(int j = 0; j < this->columns; ++j)
-                {
-                    std::cout<<this->display[i][j]<<" ";
-                }
-                std::cout<<endl;
+            std::cout<<this->display[i][j]<<" ";
         }
-    }
-    
+        std::cout<<endl;
+    }    
 }

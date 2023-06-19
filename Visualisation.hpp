@@ -7,6 +7,7 @@
 #include <utility>
 #include <memory>
 
+class Bee;
 
 class Visualisation
 {
@@ -26,8 +27,8 @@ class Visualisation
     Visualisation();
     void clearScreen();
     void prepereScreen(vector<Flower>& flowers, vector<Bee>& bees, std::shared_ptr<Hive> hive);
-    void displayAnimation(vector<Bee>& bees);
-    void updateScreen(vector<Bee>& bees);
+    void displayAnimation(Bee& bee);
+    void updateScreen(Bee& bee);
     
 
 };
