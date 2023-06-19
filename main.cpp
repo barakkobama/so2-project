@@ -52,7 +52,7 @@ int main()
             getRandomFloat(c_minBeeIntake, c_maxBeeIntake),
             getRandomFloat(c_minBeeCapasity, c_maxBeeCapasity),
             hive,
-            getRandomBool()
+            getRandomBool() || getRandomBool()
         );
     }
 

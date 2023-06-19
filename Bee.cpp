@@ -13,7 +13,7 @@ mutex Bee::hiveMutex;
 
 //Pszczoly moga miec rozna predkosc pobierania nektaru oraz rozne pojemnosci
 Bee::Bee(const float nectarPerTick, const float capacity, std::shared_ptr<Hive> hive, bool big) :
-         m_nectarPerTick(nectarPerTick), m_capacity(capacity), m_hive{hive}, m_big{big}
+         m_nectarPerTick(nectarPerTick), m_capacity(capacity), m_hive{hive}, m_big{!big}
 {
     myid = id++;
 };

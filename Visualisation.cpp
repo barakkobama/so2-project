@@ -2,6 +2,7 @@
 #include <thread>
 #include <chrono>
 #include <cstdlib>
+//#include <windows.h>  //FOR WINDOWS
 #include "Visualisation.hpp"
 
 
@@ -17,6 +18,7 @@ Visualisation::Visualisation()
 void Visualisation::clearScreen() {
     // Clear the console screen
     system("clear");
+    //system("cls");        //FOR WINDOWS
     //std::cout << "\033[2J\033[1;1H";
 }
 
